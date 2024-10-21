@@ -52,11 +52,10 @@ async def start_handler(message: Message):
 async def tasks_handler(message: Message):
     user = await get_user_by_tg_id(tg_id=message.from_user.id)
     if user.complete_tasks:
-        return await message.answer("All tasks is completed")
+        return await message.answer("✅ All tasks are completed!")
     inline_kb = tasks_inline_keyboard()
-    return await message.answer("Complete tasks to get rewards:", reply_markup=inline_kb)
+    return await message.answer("📋 Complete tasks to get rewards:", reply_markup=inline_kb)
     
-
 
 async def ref_link_handler(message: Message):
     user = await get_user_by_tg_id(tg_id=message.from_user.id)
@@ -101,10 +100,10 @@ async def bot_stats(message: Message):
     if await get_admin_by_tg_id(message.from_user.id):
         statistic = await user_statistics()
         msg = (
-            f"Total users: {statistic['total_users']}\n"
-            f"Complete task users: {statistic['complete_task_users']}\n"
-            f"Not complete task users: {statistic['not_complete_tasks_users']}"
+            f"📊 Total users: {statistic['total_users']}\n"
+            f"✅ Complete task users: {statistic['complete_task_users']}\n"
+            f"❌ Not complete task users: {statistic['not_complete_tasks_users']}"
         )
         return await message.answer(msg)
     
-    return await message.answer("Вы не являетесь администратором.")
+    return await message.answer("❗️You are not an administrator.")
