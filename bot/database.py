@@ -50,6 +50,7 @@ class User(Base):
     points = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     complete_tasks = Column(Boolean, default=False)
+    tg_premium = Column(Boolean, nullable=False)
 
     admin = relationship('Admin', back_populates='user')
 

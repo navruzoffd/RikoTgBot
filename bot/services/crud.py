@@ -1,13 +1,13 @@
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, update, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.database import SessionLocal, User, Admin
 from bot.core.logger import logger
 
 
-async def create_user(tg_id: int, username: str, referrer: int) -> User:
+async def create_user(tg_id: int, username: str, referrer: int, tg_premium: bool) -> User:
     async with SessionLocal() as session:
-        new_user = User(tg_id=tg_id, username=username, referrer=referrer)
+        new_user = User(tg_id=tg_id, username=username, referrer=referrer, tg_premium=tg_premium)
         session.add(new_user)
         await session.commit()
         return new_user
@@ -68,6 +68,29 @@ async def user_statistics() -> dict:
             "complete_task_users": complete_task_users.scalar(),
             "not_complete_tasks_users": not_complete_tasks_users.scalar()
         }
+    
+async def get_friends_stats(tg_id: int):
+    async with SessionLocal() as session:
+        query = (
+            select(
+                func.count(User.id).label('invited_count'),
+                func.sum(case((User.tg_premium == True, 1), else_=0)).label('premium_count'),
+                func.sum(case((User.complete_tasks == True, 1), else_=0)).label('completed_tasks_count'),
+                func.sum(case((User.complete_tasks == False, 1), else_=0)).label('not_completed_tasks_count')
+            )
+            .filter(User.referrer == tg_id)
+        )
+
+        result = await session.execute(query)
+        stats = result.one_or_none()
+
+        return {
+            "invited_count": stats.invited_count if stats else 0,
+            "premium_count": stats.premium_count if stats else 0,
+            "completed_tasks_count": stats.completed_tasks_count if stats else 0,
+            "not_completed_tasks_count": stats.not_completed_tasks_count if stats else 0
+        }
+
 
     
 

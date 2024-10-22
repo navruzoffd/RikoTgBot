@@ -2,7 +2,10 @@ from aiogram.types import Message, CallbackQuery
 from bot.utils import (
     check_chat_member,
     encode_referral_id,
-    decode_referral_id
+    decode_referral_id,
+    start_msg,
+    tasks_msg,
+    complete_tasks_msg
 )
 from bot.services.crud import (
     create_user,
@@ -10,10 +13,11 @@ from bot.services.crud import (
     get_admin_by_tg_id,
     task_reward,
     referrer_reward,
-    user_statistics
+    user_statistics,
+    get_friends_stats
 )
 from bot.keyboards import (
-    tasks_inline_keyboard,
+    tasks_keyboard,
     start_keyboard,
     admin_start_keyboard,
     ref_link_keyboard
@@ -37,26 +41,27 @@ async def start_handler(message: Message):
     user = await get_user_by_tg_id(tg_id=message.from_user.id)
     
     if not user:
+        tg_premium = True if message.from_user.is_premium else False
         user = await create_user(
             tg_id=message.from_user.id,
             username=username,
-            referrer=referral_code
+            referrer=referral_code,
+            tg_premium=tg_premium
         )
     admin = await get_admin_by_tg_id(tg_id=message.from_user.id)
     if admin:
-        keyboard = admin_start_keyboard()
+        start_kb = admin_start_keyboard()
     else:
-        keyboard = start_keyboard()    
-    await message.answer("👋 Hello! Complete tasks, invite friends, and earn rewards!", reply_markup=keyboard)
+        start_kb = start_keyboard()    
+    await message.answer(start_msg(), reply_markup=start_kb)
 
 async def tasks_handler(message: Message):
     user = await get_user_by_tg_id(tg_id=message.from_user.id)
     if user.complete_tasks:
         return await message.answer("✅ All tasks are completed!")
-    inline_kb = tasks_inline_keyboard()
-    return await message.answer("📋 Complete tasks to get rewards:", reply_markup=inline_kb)
+    tasks_kb = tasks_keyboard()
+    return await message.answer(tasks_msg(), reply_markup=tasks_kb)
     
-
 async def ref_link_handler(message: Message):
     user = await get_user_by_tg_id(tg_id=message.from_user.id)
 
@@ -65,8 +70,8 @@ async def ref_link_handler(message: Message):
     
     hash_id = encode_referral_id(message.from_user.id)
     link = f"https://t.me/adtgtestbot?start={hash_id}"
-    keyboard = ref_link_keyboard(hash_id=hash_id)
-    return await message.answer(f"🔗 Your referral link: {link}", reply_markup=keyboard)
+    ref_kb = ref_link_keyboard(hash_id)
+    return await message.answer(f"🔗 Your referral link: {link}", reply_markup=ref_kb)
 
 
 async def stats_handler(message: Message):
@@ -90,11 +95,13 @@ async def callback_check_btn(callback_query: CallbackQuery):
         await task_reward(tg_id=callback_query.from_user.id)
         if user.referrer:
             referrer_id = user.referrer
-            ref_reward = 15 if callback_query.from_user.is_premium else 5
+            ref_reward = 15 if user.tg_premium else 5
             await referrer_reward(referrer_id=referrer_id, reward=ref_reward)
-        return await callback_query.message.answer("🎉 Tasks completed! You received a reward.")
+        hash_id = encode_referral_id(callback_query.from_user.id)
+        ref_kb = ref_link_keyboard(hash_id)
+        return await callback_query.message.answer(complete_tasks_msg(), reply_markup=ref_kb)
     
-    return await callback_query.message.answer("❌ Tasks are not completed yet. Subscribe to the channel and try again.")
+    return await callback_query.message.answer("❌ Tasks are not completed yet. Try again!")
 
 async def bot_stats(message: Message):
     if await get_admin_by_tg_id(message.from_user.id):
@@ -107,3 +114,13 @@ async def bot_stats(message: Message):
         return await message.answer(msg)
     
     return await message.answer("❗️You are not an administrator.")
+
+async def friends_stats_handler(message: Message):
+    statistic = await get_friends_stats(message.from_user.id)
+    msg = (
+        f"Invited Friends: {statistic['invited_count']}\n"
+        f"Premium Friends: {statistic['premium_count']}\n"
+        f"Completed Tasks Friends: {statistic['completed_tasks_count']}\n" 
+        f"Not Completed Tasks Friends: {statistic['not_completed_tasks_count']}\n" 
+    )
+    return await message.answer(msg)
