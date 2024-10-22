@@ -74,9 +74,9 @@ async def get_friends_stats(tg_id: int):
         query = (
             select(
                 func.count(User.id).label('invited_count'),
-                func.sum(case((User.tg_premium == True, 1), else_=0)).label('premium_count'),
-                func.sum(case((User.complete_tasks == True, 1), else_=0)).label('completed_tasks_count'),
-                func.sum(case((User.complete_tasks == False, 1), else_=0)).label('not_completed_tasks_count')
+                func.coalesce(func.sum(case((User.tg_premium == True, 1), else_=0)), 0).label('premium_count'),
+                func.coalesce(func.sum(case((User.complete_tasks == True, 1), else_=0)), 0).label('completed_tasks_count'),
+                func.coalesce(func.sum(case((User.complete_tasks == False, 1), else_=0)), 0).label('not_completed_tasks_count')
             )
             .filter(User.referrer == tg_id)
         )
@@ -85,10 +85,10 @@ async def get_friends_stats(tg_id: int):
         stats = result.one_or_none()
 
         return {
-            "invited_count": stats.invited_count if stats else 0,
-            "premium_count": stats.premium_count if stats else 0,
-            "completed_tasks_count": stats.completed_tasks_count if stats else 0,
-            "not_completed_tasks_count": stats.not_completed_tasks_count if stats else 0
+            "invited_count": stats.invited_count,
+            "premium_count": stats.premium_count,
+            "completed_tasks_count": stats.completed_tasks_count,
+            "not_completed_tasks_count": stats.not_completed_tasks_count
         }
 
 

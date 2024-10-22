@@ -8,7 +8,9 @@ from bot.handler.handlers import (
     callback_check_btn,
     bot_stats,
     tasks_handler,
-    friends_stats_handler
+    friends_stats_handler,
+    go_to_stats_menu,
+    back_to_menu
 )
 
 
@@ -18,5 +20,7 @@ def register_handlers(router: Router) -> None:
     router.message.register(stats_handler, F.text == "📊 My Stats")
     router.message.register(bot_stats, F.text == "🤖 Bot Stats")
     router.message.register(tasks_handler, F.text == "📝 Tasks")
+    router.message.register(go_to_stats_menu, F.text == "📊 Stats")
     router.message.register(friends_stats_handler, F.text == "📊 Friends Stats")
+    router.message.register(back_to_menu, F.text == "🔙 Back")
     router.callback_query.register(callback_check_btn, lambda c: c.data == "check_btn")

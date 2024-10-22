@@ -20,7 +20,8 @@ from bot.keyboards import (
     tasks_keyboard,
     start_keyboard,
     admin_start_keyboard,
-    ref_link_keyboard
+    ref_link_keyboard,
+    stats_keyboard
     )
 
 async def start_handler(message: Message):
@@ -124,3 +125,15 @@ async def friends_stats_handler(message: Message):
         f"Not Completed Tasks Friends: {statistic['not_completed_tasks_count']}\n" 
     )
     return await message.answer(msg)
+
+async def go_to_stats_menu(message: Message):
+    stats_kb = stats_keyboard()
+    return await message.answer("📊Here are your stats:", reply_markup=stats_kb)
+
+async def back_to_menu(message: Message):
+    admin = await get_admin_by_tg_id(tg_id=message.from_user.id)
+    if admin:
+        start_kb = admin_start_keyboard()
+    else:
+        start_kb = start_keyboard()
+    return await message.answer("Main menu", reply_markup=start_kb)

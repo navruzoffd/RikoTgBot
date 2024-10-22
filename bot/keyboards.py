@@ -24,16 +24,23 @@ def ref_link_keyboard(hash_id: str):
 
 def start_keyboard():
     keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="📝 Tasks"), KeyboardButton(text="📊 My Stats")],
-        [KeyboardButton(text="👥 Invite Friends"), KeyboardButton(text="📊 Friends Stats")]
+        [KeyboardButton(text="📝 Tasks"), KeyboardButton(text="📊 Stats")],
+        [KeyboardButton(text="👥 Invite Friends")]
     ], resize_keyboard=True)
     return keyboard
 
 
 def admin_start_keyboard():
     keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="📝 Tasks"), KeyboardButton(text="📊 My Stats")],
+        [KeyboardButton(text="📝 Tasks"), KeyboardButton(text="📊 Stats")],
         [KeyboardButton(text="👥 Invite Friends")],
         [KeyboardButton(text="🤖 Bot Stats")],
     ], resize_keyboard=True)
+    return keyboard
+
+def stats_keyboard():
+    keyboard = ReplyKeyboardMarkup(keyboard=[
+            [KeyboardButton(text="📊 My Stats"), KeyboardButton(text="📊 Friends Stats")],
+            [KeyboardButton(text="🔙 Back")]
+        ], resize_keyboard=True)
     return keyboard
