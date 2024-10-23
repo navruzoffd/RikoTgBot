@@ -59,19 +59,29 @@ async def get_admin_by_tg_id(tg_id: int) -> Admin | None:
 
 async def user_statistics() -> dict:
     async with SessionLocal() as session:
-        total_users = await session.execute(select(func.count(User.id)))
-        complete_task_users = await session.execute(select(func.count(User.id)).where(User.complete_tasks.is_(True)))
-        not_complete_tasks_users = await session.execute(select(func.count(User.id)).where(User.complete_tasks.is_(False)))
+        stmt = (
+            select(
+                func.count(User.id).label('total_users'),
+                func.coalesce(func.sum(case((User.tg_premium == True, 1), else_=0)), 0).label('premium_count'),
+                func.coalesce(func.sum(case((User.complete_tasks == True, 1), else_=0)), 0).label('completed_tasks_count'),
+                func.coalesce(func.sum(case((User.complete_tasks == False, 1), else_=0)), 0).label('not_completed_tasks_count')
+            )
+        )
+
+        result = await session.execute(stmt)
+        stats = result.one_or_none()
 
         return {
-            "total_users": total_users.scalar(),
-            "complete_task_users": complete_task_users.scalar(),
-            "not_complete_tasks_users": not_complete_tasks_users.scalar()
+            "total_users": stats.total_users,
+            "premium_count": stats.premium_count,
+            "complete_task_users": stats.completed_tasks_count,
+            "not_complete_tasks_users": stats.not_completed_tasks_count
         }
+
     
-async def get_friends_stats(tg_id: int):
+async def get_friends_stats(tg_id: int) -> dict:
     async with SessionLocal() as session:
-        query = (
+        stmt = (
             select(
                 func.count(User.id).label('invited_count'),
                 func.coalesce(func.sum(case((User.tg_premium == True, 1), else_=0)), 0).label('premium_count'),
@@ -81,7 +91,7 @@ async def get_friends_stats(tg_id: int):
             .filter(User.referrer == tg_id)
         )
 
-        result = await session.execute(query)
+        result = await session.execute(stmt)
         stats = result.one_or_none()
 
         return {

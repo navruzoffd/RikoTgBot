@@ -109,6 +109,7 @@ async def bot_stats(message: Message):
         statistic = await user_statistics()
         msg = (
             f"📊 Total users: {statistic['total_users']}\n"
+            f"💎Premium Users: {statistic['premium_count']}\n"
             f"✅ Complete task users: {statistic['complete_task_users']}\n"
             f"❌ Not complete task users: {statistic['not_complete_tasks_users']}"
         )
@@ -136,4 +137,4 @@ async def back_to_menu(message: Message):
         start_kb = admin_start_keyboard()
     else:
         start_kb = start_keyboard()
-    return await message.answer("Main menu", reply_markup=start_kb)
+    return await message.answer("🏠Main menu", reply_markup=start_kb)

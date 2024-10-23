@@ -40,7 +40,7 @@ def admin_start_keyboard():
 
 def stats_keyboard():
     keyboard = ReplyKeyboardMarkup(keyboard=[
-            [KeyboardButton(text="📊 My Stats"), KeyboardButton(text="📊 Friends Stats")],
+            [KeyboardButton(text="📈 My Stats"), KeyboardButton(text="📊 Friends Stats")],
             [KeyboardButton(text="🔙 Back")]
         ], resize_keyboard=True)
     return keyboard

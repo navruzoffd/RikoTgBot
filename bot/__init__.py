@@ -30,7 +30,6 @@ async def setup_bot_settings(bot: Bot, dp: Dispatcher) -> None:
     await bot.set_my_description(description=Mesages.DESCRIPTION)
     await bot.set_my_short_description(short_description=Mesages.SHORT_DESCRIPTION)
 
-    setup_i18n(dp)
     register_handlers(dp)
 
     logger.info("Webhook worker started")

@@ -17,7 +17,7 @@ from bot.handler.handlers import (
 def register_handlers(router: Router) -> None:
     router.message.register(start_handler, CommandStart())
     router.message.register(ref_link_handler, F.text == "👥 Invite Friends")
-    router.message.register(stats_handler, F.text == "📊 My Stats")
+    router.message.register(stats_handler, F.text == "📈 My Stats")
     router.message.register(bot_stats, F.text == "🤖 Bot Stats")
     router.message.register(tasks_handler, F.text == "📝 Tasks")
     router.message.register(go_to_stats_menu, F.text == "📊 Stats")
